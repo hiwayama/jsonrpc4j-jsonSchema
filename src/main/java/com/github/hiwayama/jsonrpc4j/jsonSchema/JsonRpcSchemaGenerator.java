@@ -1,13 +1,19 @@
+/**
+ * @package   jsonrpc4j-jsonSchema
+ * @author    Hiromasa IWAYAMA <iwayma1880@gmail.com>
+ * @copyright 2018 hiwayama
+ * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache-2.0
+ */
 package com.github.hiwayama.jsonrpc4j.jsonSchema;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
-import com.fasterxml.jackson.module.jsonSchema.factories.WrapperFactory;
-import com.fasterxml.jackson.module.jsonSchema.types.ArraySchema;
-import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
+import com.fasterxml.jackson.module.jsonSchema.types.*;
 import com.github.hiwayama.jsonrpc4j.jsonSchema.annotations.JsonRpcResponseTitle;
 import com.github.hiwayama.jsonrpc4j.jsonSchema.annotations.JsonSchemaTitle;
 import com.googlecode.jsonrpc4j.JsonRpcMethod;
@@ -17,22 +23,19 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class JsonRpcSchemaGenerator {
     private static final Map<String, Class> PRIMITIVE_CLASS_MAP = new HashMap<>();
     static {
-        PRIMITIVE_CLASS_MAP.put("byte", byte.class);
-        PRIMITIVE_CLASS_MAP.put("short", short.class);
-        PRIMITIVE_CLASS_MAP.put("int", int.class);
-        PRIMITIVE_CLASS_MAP.put("long", long.class);
-        PRIMITIVE_CLASS_MAP.put("float", float.class);
-        PRIMITIVE_CLASS_MAP.put("double", double.class);
-        PRIMITIVE_CLASS_MAP.put("boolean", boolean.class);
-        PRIMITIVE_CLASS_MAP.put("char", char.class);
+        PRIMITIVE_CLASS_MAP.put("byte", Byte.class);
+        PRIMITIVE_CLASS_MAP.put("short", Integer.class);
+        PRIMITIVE_CLASS_MAP.put("int", Integer.class);
+        PRIMITIVE_CLASS_MAP.put("long", Integer.class);
+        PRIMITIVE_CLASS_MAP.put("float", Float.class);
+        PRIMITIVE_CLASS_MAP.put("double", Double.class);
+        PRIMITIVE_CLASS_MAP.put("boolean", Boolean.class);
+        PRIMITIVE_CLASS_MAP.put("char", Character.class);
     }
 
     private ObjectMapper mapper;
@@ -52,35 +55,37 @@ public class JsonRpcSchemaGenerator {
         this.generator = new JsonSchemaGenerator(mapper, wrapperFactory);
     }
 
-    private JsonSchema generateRequestSchema(Method methodObj) throws JsonMappingException, ClassNotFoundException {
-        ObjectSchema schema = new ObjectSchema();
+    private JsonSchema generateRequestSchema(Method methodObj) throws JsonProcessingException, ClassNotFoundException {
+        ObjectSchema objSchema = new ObjectSchema();
         for (int i = 0; i < methodObj.getParameterCount(); i++) {
             Type paramType = methodObj.getGenericParameterTypes()[i];
             Annotation[] annotations = methodObj.getParameterAnnotations()[i];
             if (annotations != null && annotations.length > 0) {
                 JsonRpcParam paramNameAnno = (JsonRpcParam) annotations[0];
                 String methodName = paramNameAnno.value();
-                if (paramType instanceof Class) {
-                    if (((Class) paramType).isPrimitive()) {
-                        schema.putProperty(methodName, generator.generateSchema(PRIMITIVE_CLASS_MAP.get(paramType.getTypeName())));
-                    }
-                }
-                if (paramType instanceof ParameterizedType) {
-                    schema.putProperty(methodName, getCollectionSchema((ParameterizedType) paramType));
-                } else {
-                    schema.putProperty(methodName, generator.generateSchema(paramType.getClass()));
-                }
+                objSchema.putProperty(methodName, generateSchema(paramType));
             } else {
-                // TODO impl for array parameter
+                // TODO implemented for arraySchema
+                throw new UnsupportedOperationException("Not implemented for array schema");
             }
         }
-        return schema;
+        return objSchema;
+    }
+
+    private JsonSchema generateSchema(Type paramType) throws JsonMappingException, ClassNotFoundException {
+        if (paramType instanceof Class && ((Class) paramType).isPrimitive()) {
+            return generator.generateSchema(PRIMITIVE_CLASS_MAP.get(paramType.getTypeName()));
+        } else if (paramType instanceof ParameterizedType) {
+            return getCollectionSchema((ParameterizedType) paramType);
+        } else {
+            return generator.generateSchema(Class.forName(paramType.getTypeName()));
+        }
     }
 
     private JsonSchema generateResponseSchema(Method method) throws JsonMappingException, ClassNotFoundException {
         Type returnType = method.getGenericReturnType();
 
-        JsonSchema resSchema;
+        JsonSchema resSchema = null;
         if (returnType instanceof Class<?>) {
             if (((Class) returnType).isPrimitive()) {
                 resSchema = generator.generateSchema(PRIMITIVE_CLASS_MAP.get(returnType.getTypeName()));
@@ -116,7 +121,14 @@ public class JsonRpcSchemaGenerator {
         }
     }
 
-    public List<JsonRpcSchema> generate(Class<?> serviceClass) throws JsonMappingException, ClassNotFoundException {
+    /**
+     * generate API Schemas
+     * @param serviceClass Service Class of jsonrpc4j
+     * @return API Schema objects
+     * @throws JsonProcessingException
+     * @throws ClassNotFoundException
+     */
+    public List<JsonRpcSchema> generate(Class<?> serviceClass) throws JsonProcessingException, ClassNotFoundException {
         List<JsonRpcSchema> schemas = new ArrayList<>();
         for (Method m : serviceClass.getMethods()) {
             JsonRpcSchema schema = generateImpl(m);
@@ -127,7 +139,7 @@ public class JsonRpcSchemaGenerator {
         return schemas;
     }
 
-    private JsonRpcSchema generateImpl(Method methodObj) throws JsonMappingException, ClassNotFoundException {
+    private JsonRpcSchema generateImpl(Method methodObj) throws ClassNotFoundException, JsonProcessingException {
         JsonRpcMethod methodAnno = methodObj.getAnnotation(JsonRpcMethod.class);
         if (methodAnno == null) {
             return null;

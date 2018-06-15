@@ -5,6 +5,7 @@ import com.github.hiwayama.jsonrpc4j.jsonSchema.annotations.JsonSchemaTitle;
 import com.googlecode.jsonrpc4j.JsonRpcMethod;
 import com.googlecode.jsonrpc4j.JsonRpcParam;
 
+import java.time.Duration;
 import java.util.List;
 
 /**
@@ -23,4 +24,8 @@ public interface SampleService {
     @JsonSchemaTitle("get users")
     @JsonRpcResponseTitle("users list")
     List<SampleUser> getList(@JsonRpcParam("ids") List<String> userIds);
+
+    // TODO
+    // @JsonRpcMethod("sample.arraySchema")
+    // String arraySchemaMethod(String a, int b, long c, SampleUser d);
 }

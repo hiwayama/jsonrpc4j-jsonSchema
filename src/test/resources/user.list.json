@@ -1,1 +1,49 @@
-{"method":"user.list","title":"get users","request":{"type":"object","properties":{"ids":{"type":"array","required":true,"items":{"type":"string"}}}},"response":{"type":"array","title":"users list","items":{"type":"object","id":"urn:jsonschema:com:github:hiwayama:jsonrpc4j:jsonSchema:SampleUser","properties":{"name":{"type":"string"},"inner":{"type":"object","id":"urn:jsonschema:com:github:hiwayama:jsonrpc4j:jsonSchema:SampleUser:InnerObj","properties":{"age":{"type":"integer"},"string":{"type":"string"},"userType":{"type":"string","enum":["A1","B1","C1"]}}}}}}}
+{
+  "method":"user.list",
+  "title":"get users",
+  "request":{
+    "type":"object",
+    "properties":{
+      "ids":{
+        "type":"array",
+        "required":true,
+        "items":{
+          "type":"string"
+        }
+      }
+    }
+  },
+  "response":{
+    "type":"array",
+    "title":"users list",
+    "items":{
+      "type":"object",
+      "id":"urn:jsonschema:com:github:hiwayama:jsonrpc4j:jsonSchema:SampleUser",
+      "properties":{
+        "name":{
+          "type":"string"
+        },
+        "inner":{
+          "type":"object",
+          "id":"urn:jsonschema:com:github:hiwayama:jsonrpc4j:jsonSchema:SampleUser:InnerObj",
+          "properties":{
+            "age":{
+              "type":"integer"
+            },
+            "string":{
+              "type":"string"
+            },
+            "userType":{
+              "type":"string",
+              "enum":[
+                "A1",
+                "B1",
+                "C1"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}
