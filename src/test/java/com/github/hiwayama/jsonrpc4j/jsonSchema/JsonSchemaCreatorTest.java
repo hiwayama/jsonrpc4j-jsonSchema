@@ -20,7 +20,7 @@ public class JsonSchemaCreatorTest {
 
     @Test
     public void test() throws IOException, ClassNotFoundException {
-        for (String name : new String[] {"user.get.json", "user.list.json"}) {
+        for (String name : new String[] {"user.get.json", "user.list.json", "user.getById.json"}) {
             StringBuilder expeted = new StringBuilder();
             try (BufferedReader br = new BufferedReader(
                     new InputStreamReader(JsonSchemaCreatorTest.class.getClassLoader().getResourceAsStream(name)))) {
