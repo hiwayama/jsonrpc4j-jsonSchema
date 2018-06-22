@@ -1,5 +1,8 @@
+import io.franzbecker.gradle.lombok.task.DelombokTask
+
 plugins {
     id 'java'
+    id 'io.franzbecker.gradle-lombok' version '1.14'
 }
 
 group 'com.github.hiwayama'
@@ -9,6 +12,21 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+}
+
+task delombok(type: DelombokTask, dependsOn: compileJava) {
+    ext.outputDir = file("$buildDir/delombok")
+    outputs.dir(outputDir)
+    sourceSets.main.java.srcDirs.each {
+        inputs.dir(it)
+        args(it, "-d", outputDir)
+    }
+}
+
+javadoc {
+    dependsOn delombok
+    source = delombok.outputDir
+    failOnError = false
 }
 
 dependencies {
