@@ -9,7 +9,6 @@ package com.github.hiwayama.jsonrpc4j.jsonSchema;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
 import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
@@ -125,8 +124,8 @@ public class JsonRpcSchemaGenerator {
      * generate API Schemas
      * @param serviceClass Service Class of jsonrpc4j
      * @return API Schema objects
-     * @throws JsonProcessingException
-     * @throws ClassNotFoundException
+     * @throws JsonProcessingException on error
+     * @throws ClassNotFoundException on error
      */
     public List<JsonRpcSchema> generate(Class<?> serviceClass) throws JsonProcessingException, ClassNotFoundException {
         List<JsonRpcSchema> schemas = new ArrayList<>();

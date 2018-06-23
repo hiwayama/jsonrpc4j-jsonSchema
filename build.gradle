@@ -1,37 +1,84 @@
-import io.franzbecker.gradle.lombok.task.DelombokTask
-
 plugins {
     id 'java'
-    id 'io.franzbecker.gradle-lombok' version '1.14'
+    id 'maven'
+    id 'signing'
 }
 
+archivesBaseName = "jsonrpc4j-jsonSchema"
+description 'This module is jackson-module-jsonschema wrapper for the creation of api document (like JSON-Schema) from POJO of jsonrpc4j service classes.'
 group 'com.github.hiwayama'
-version '0.1-SNAPSHOT'
+version '0.2-alpha-1'
 
 sourceCompatibility = 1.8
+
+// zip sources
+task sourceJar(type : Jar) {
+    from sourceSets.main.allJava
+}
+// zip javadocs
+task javadocJar(type : Jar, dependsOn : javadoc) {
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar, sourceJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            def ossuname = project.hasProperty("ossrhUsername") ? project.property("ossrhUsername") : ""
+            def osspass = project.hasProperty("ossrhPassword") ? project.property("ossrhPassword") : ""
+
+
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossuname, password: osspass)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossuname, password: osspass)
+            }
+
+            pom.project {
+                name project.name
+                packaging 'jar'
+                description project.description
+                url 'https://github.com/hiwayama/jsonrpc-jsonSchema'
+
+                scm {
+                    url 'https://github.com/hiwayama/jsonrpc-jsonSchema'
+                }
+
+                licenses {
+                    license {
+                        name 'The Apache License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        name 'Hiromasa IWAYAMA'
+                        email 'iwayma1880@gmail.com'
+                    }
+                }
+            }
+        }
+    }
+}
 
 repositories {
     mavenCentral()
 }
 
-task delombok(type: DelombokTask, dependsOn: compileJava) {
-    ext.outputDir = file("$buildDir/delombok")
-    outputs.dir(outputDir)
-    sourceSets.main.java.srcDirs.each {
-        inputs.dir(it)
-        args(it, "-d", outputDir)
-    }
-}
-
-javadoc {
-    dependsOn delombok
-    source = delombok.outputDir
-    failOnError = false
-}
-
 dependencies {
     compile "com.fasterxml.jackson.module:jackson-module-jsonSchema:2.8.5"
     compile 'com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.3'
-    compileOnly "org.projectlombok:lombok:1.16.20"
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
