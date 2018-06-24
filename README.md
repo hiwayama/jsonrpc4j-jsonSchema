@@ -1,5 +1,7 @@
 # jsonrpc4j-jsonSchema
 
+[![Dependency Status](https://img.shields.io/maven-metadata/v/http/central.maven.org/maven2/com/github/hiwayama/jsonrpc4j-jsonSchema/maven-metadata.xml.svg)](https://mvnrepository.com/artifact/com.github.hiwayama/jsonrpc4j-jsonSchema)
+
 This module is [jackson-module-jsonschema](https://github.com/FasterXML/jackson-module-jsonSchema) wrapper for the creation of api document (like JSON-Schema) from POJO of [jsonrpc4j](https://github.com/briandilley/jsonrpc4j) service classes.
 
 ## Installation
