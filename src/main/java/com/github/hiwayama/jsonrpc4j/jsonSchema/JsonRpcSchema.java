@@ -2,7 +2,6 @@ package com.github.hiwayama.jsonrpc4j.jsonSchema;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 
 import java.io.Serializable;
 
