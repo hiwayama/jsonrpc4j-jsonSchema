@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.kjetland.jackson.jsonSchema.JsonSchemaConfig;
 import com.kjetland.jackson.jsonSchema.JsonSchemaGenerator;
 import org.junit.Assert;
@@ -19,8 +18,7 @@ import java.util.Map;
 
 public class JsonSchemaCreatorTest {
     private JsonRpcSchemaGenerator creator = new JsonRpcSchemaGenerator();
-    private SimpleModule module = new SimpleModule().addDeserializer(SampleUser.ISample1.class, new SampleDeserializer());
-    private ObjectMapper mapper = new ObjectMapper().registerModule(module);
+    private ObjectMapper mapper = new ObjectMapper();
 
     private Map<String, String> expectedData = new HashMap<>();
 

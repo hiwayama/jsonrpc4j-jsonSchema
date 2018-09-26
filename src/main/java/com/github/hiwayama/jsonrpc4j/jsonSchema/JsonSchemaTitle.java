@@ -1,4 +1,4 @@
-package com.github.hiwayama.jsonrpc4j.jsonSchema.annotations;
+package com.github.hiwayama.jsonrpc4j.jsonSchema;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

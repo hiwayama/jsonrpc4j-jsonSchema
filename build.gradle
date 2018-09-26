@@ -2,14 +2,16 @@ plugins {
     id 'java'
     id 'maven'
     id 'signing'
+    id 'jacoco'
 }
 
 archivesBaseName = "jsonrpc4j-jsonSchema"
 description 'This module is jackson-module-jsonschema wrapper for the creation of api document (like JSON-Schema) from POJO of jsonrpc4j service classes.'
 group 'com.github.hiwayama'
-version '0.3'
+version '0.4'
 
 sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 // zip sources
 task sourceJar(type : Jar) {
@@ -26,6 +28,18 @@ artifacts {
 
 signing {
     sign configurations.archives
+}
+
+jacoco {
+    toolVersion = '0.8.2'
+}
+
+jacocoTestReport {
+  reports {
+    xml.enabled false
+    csv.enabled false
+    html.destination files("${buildDir}/jacocoHtml")
+  }
 }
 
 uploadArchives {
@@ -79,7 +93,8 @@ repositories {
 
 dependencies {
     compile group: 'com.kjetland', name: 'mbknor-jackson-jsonschema_2.12', version: '1.0.30'
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.7'
-    compile 'com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.3'
+    compile ('com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.3') {
+        transitive = false
+    }
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }

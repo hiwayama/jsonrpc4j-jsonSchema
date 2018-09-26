@@ -1,11 +1,8 @@
 package com.github.hiwayama.jsonrpc4j.jsonSchema;
 
-import com.github.hiwayama.jsonrpc4j.jsonSchema.annotations.JsonRpcResponseTitle;
-import com.github.hiwayama.jsonrpc4j.jsonSchema.annotations.JsonSchemaTitle;
 import com.googlecode.jsonrpc4j.JsonRpcMethod;
 import com.googlecode.jsonrpc4j.JsonRpcParam;
 
-import java.time.Duration;
 import java.util.List;
 
 /**
