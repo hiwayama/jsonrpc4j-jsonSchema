@@ -1,6 +1,7 @@
 package com.github.hiwayama.jsonrpc4j.jsonSchema;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 
 import java.io.Serializable;
@@ -30,11 +31,11 @@ public class JsonRpcSchema implements Serializable {
     @JsonProperty("title")
     private String title;
     @JsonProperty("request")
-    private JsonSchema request;
+    private JsonNode request;
     @JsonProperty("response")
-    private JsonSchema response;
+    private JsonNode response;
 
-    public JsonRpcSchema(String method, String title, JsonSchema request, JsonSchema response) {
+    public JsonRpcSchema(String method, String title, JsonNode request, JsonNode response) {
         this.method = method;
         this.title = title;
         this.request = request;
@@ -58,14 +59,14 @@ public class JsonRpcSchema implements Serializable {
     /**
      * @return JsonSchema of param object
      */
-    public JsonSchema getRequest() {
+    public JsonNode getRequest() {
         return request;
     }
 
     /**
      * @return JsonSchema of result items
      */
-    public JsonSchema getResponse() {
+    public JsonNode getResponse() {
         return response;
     }
 }

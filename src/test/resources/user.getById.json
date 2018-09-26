@@ -2,31 +2,49 @@
   "method":"user.getById",
   "title":"get single user by numeric id",
   "request":{
-    "type":"object",
-    "properties":{
-      "id":{
-        "type":"integer",
-        "required":true
-      },
-      "opt":{
-        "type":"string",
-        "required":true
-      }
+    "opt":{
+      "$schema":"http://json-schema.org/draft-04/schema#",
+      "title":"String",
+      "type":"string"
+    },
+    "id":{
+      "$schema":"http://json-schema.org/draft-04/schema#",
+      "title":"Integer",
+      "type":"integer"
     }
   },
   "response":{
+    "$schema":"http://json-schema.org/draft-04/schema#",
+    "title":"Sample User",
     "type":"object",
-    "id":"urn:jsonschema:com:github:hiwayama:jsonrpc4j:jsonSchema:SampleUser",
+    "additionalProperties":false,
     "properties":{
       "name":{
         "type":"string"
       },
       "inner":{
+        "$ref":"#/definitions/InnerObj"
+      },
+      "interface":{
+        "oneOf":[
+          {
+            "$ref":"#/definitions/SampleImpl1"
+          },
+          {
+            "$ref":"#/definitions/SampleImpl2"
+          }
+        ]
+      }
+    },
+    "definitions":{
+      "InnerObj":{
         "type":"object",
-        "id":"urn:jsonschema:com:github:hiwayama:jsonrpc4j:jsonSchema:SampleUser:InnerObj",
+        "additionalProperties":false,
         "properties":{
           "age":{
-            "type":"integer"
+            "type":"integer",
+            "minimum":0,
+            "maximum":200
           },
           "string":{
             "type":"string"
@@ -39,7 +57,53 @@
               "C1"
             ]
           }
-        }
+        },
+        "required":[
+          "age"
+        ]
+      },
+      "SampleImpl1":{
+        "type":"object",
+        "additionalProperties":false,
+        "properties":{
+          "name":{
+            "type":"string",
+            "enum":[
+              "1"
+            ],
+            "default":"1"
+          },
+          "n":{
+            "type":"integer",
+            "maximum":10
+          }
+        },
+        "title":"1",
+        "required":[
+          "name",
+          "n"
+        ]
+      },
+      "SampleImpl2":{
+        "type":"object",
+        "additionalProperties":false,
+        "properties":{
+          "name":{
+            "type":"string",
+            "enum":[
+              "2"
+            ],
+            "default":"2"
+          },
+          "v":{
+            "type":"number"
+          }
+        },
+        "title":"2",
+        "required":[
+          "name",
+          "v"
+        ]
       }
     }
   }

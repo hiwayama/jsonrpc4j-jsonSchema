@@ -6,11 +6,17 @@
  */
 package com.github.hiwayama.jsonrpc4j.jsonSchema;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
-import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
+import com.kjetland.jackson.jsonSchema.*;
 import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
 import com.fasterxml.jackson.module.jsonSchema.types.*;
 import com.github.hiwayama.jsonrpc4j.jsonSchema.annotations.JsonRpcResponseTitle;
@@ -18,7 +24,9 @@ import com.github.hiwayama.jsonrpc4j.jsonSchema.annotations.JsonSchemaTitle;
 import com.googlecode.jsonrpc4j.JsonRpcMethod;
 import com.googlecode.jsonrpc4j.JsonRpcParam;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -49,47 +57,42 @@ public class JsonRpcSchemaGenerator {
         this.generator = new JsonSchemaGenerator(mapper);
     }
 
-    public JsonRpcSchemaGenerator(ObjectMapper mapper,  SchemaFactoryWrapper wrapperFactory) {
-        this(mapper);
-        this.generator = new JsonSchemaGenerator(mapper, wrapperFactory);
-    }
-
-    private JsonSchema generateRequestSchema(Method methodObj) throws JsonProcessingException, ClassNotFoundException {
-        ObjectSchema objSchema = new ObjectSchema();
+    private JsonNode generateRequestSchema(Method methodObj) throws JsonProcessingException, ClassNotFoundException {
+        Map<String, JsonNode> objSchema = new HashMap<>();
         for (int i = 0; i < methodObj.getParameterCount(); i++) {
             Type paramType = methodObj.getGenericParameterTypes()[i];
             Annotation[] annotations = methodObj.getParameterAnnotations()[i];
             if (annotations != null && annotations.length > 0) {
                 JsonRpcParam paramNameAnno = (JsonRpcParam) annotations[0];
                 String methodName = paramNameAnno.value();
-                objSchema.putProperty(methodName, generateSchema(paramType));
+                objSchema.put(methodName, generateSchema(paramType));
             } else {
                 // TODO implemented for arraySchema
                 throw new UnsupportedOperationException("Not implemented for array schema");
             }
         }
-        return objSchema;
+        return mapper.valueToTree(objSchema);
     }
 
-    private JsonSchema generateSchema(Type paramType) throws JsonMappingException, ClassNotFoundException {
+    private JsonNode generateSchema(Type paramType) throws JsonMappingException, ClassNotFoundException {
         if (paramType instanceof Class && ((Class) paramType).isPrimitive()) {
-            return generator.generateSchema(PRIMITIVE_CLASS_MAP.get(paramType.getTypeName()));
+            return generator.generateJsonSchema(PRIMITIVE_CLASS_MAP.get(paramType.getTypeName()));
         } else if (paramType instanceof ParameterizedType) {
             return getCollectionSchema((ParameterizedType) paramType);
         } else {
-            return generator.generateSchema(Class.forName(paramType.getTypeName()));
+            return generator.generateJsonSchema(Class.forName(paramType.getTypeName()));
         }
     }
 
-    private JsonSchema generateResponseSchema(Method method) throws JsonMappingException, ClassNotFoundException {
+    private JsonNode generateResponseSchema(Method method) throws JsonMappingException, ClassNotFoundException {
         Type returnType = method.getGenericReturnType();
 
-        JsonSchema resSchema = null;
+        JsonNode resSchema = null;
         if (returnType instanceof Class<?>) {
             if (((Class) returnType).isPrimitive()) {
-                resSchema = generator.generateSchema(PRIMITIVE_CLASS_MAP.get(returnType.getTypeName()));
+                resSchema = generator.generateJsonSchema(PRIMITIVE_CLASS_MAP.get(returnType.getTypeName()));
             } else {
-                resSchema = generator.generateSchema((Class)returnType);
+                resSchema = generator.generateJsonSchema((Class)returnType);
             }
         } else if(returnType instanceof ParameterizedType) {
             ParameterizedType parameterizedType = ((ParameterizedType)returnType);
@@ -101,19 +104,19 @@ public class JsonRpcSchemaGenerator {
         JsonRpcResponseTitle titleAnno = method.getAnnotation(JsonRpcResponseTitle.class);
         if (titleAnno != null) {
             String schemaTitle = titleAnno.value();
-            resSchema.asSimpleTypeSchema().setTitle(schemaTitle);
+            if ( resSchema.findValuesAsText("title") == null ) {
+                ((ObjectNode)resSchema).put("title", schemaTitle);
+            }
         }
 
         return resSchema;
     }
 
-    private JsonSchema getCollectionSchema(ParameterizedType type) throws ClassNotFoundException, JsonMappingException {
+    private JsonNode getCollectionSchema(ParameterizedType type) throws ClassNotFoundException, JsonMappingException {
         if (type.getRawType().getTypeName().equals(List.class.getTypeName())) {
-            ArraySchema arraySchema = new ArraySchema();
-            arraySchema.setItemsSchema(
-                    generator.generateSchema(
-                            Class.forName(type.getActualTypeArguments()[0].getTypeName())));
-            return arraySchema;
+            System.out.println(type.getActualTypeArguments()[0].getTypeName());
+            Class<?> t = Class.forName(type.getActualTypeArguments()[0].getTypeName());
+            return generator.generateJsonSchema(Array.newInstance(t, 0).getClass());
         } else {
             // TODO impl for java.util.Map
             return null;
