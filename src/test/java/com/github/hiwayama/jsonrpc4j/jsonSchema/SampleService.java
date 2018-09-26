@@ -26,6 +26,6 @@ public interface SampleService {
     List<SampleUser> getList(@JsonRpcParam("ids") List<String> userIds);
 
     // TODO
-    // @JsonRpcMethod("sample.arraySchema")
-    // String arraySchemaMethod(String a, int b, long c, SampleUser d);
+    //@JsonRpcMethod("sample.arraySchema")
+    //String arraySchemaMethod(String a, int b, long c, SampleUser d);
 }

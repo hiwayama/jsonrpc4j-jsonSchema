@@ -2,47 +2,112 @@
   "method":"user.list",
   "title":"get users",
   "request":{
-    "type":"object",
-    "properties":{
-      "ids":{
-        "type":"array",
-        "required":true,
-        "items":{
-          "type":"string"
-        }
+    "ids":{
+      "$schema":"http://json-schema.org/draft-04/schema#",
+      "title":"String []",
+      "type":"array",
+      "items":{
+        "type":"string"
       }
     }
   },
   "response":{
+    "$schema":"http://json-schema.org/draft-04/schema#",
+    "title":"Sample User []",
     "type":"array",
-    "title":"users list",
     "items":{
-      "type":"object",
-      "id":"urn:jsonschema:com:github:hiwayama:jsonrpc4j:jsonSchema:SampleUser",
-      "properties":{
-        "name":{
-          "type":"string"
-        },
-        "inner":{
-          "type":"object",
-          "id":"urn:jsonschema:com:github:hiwayama:jsonrpc4j:jsonSchema:SampleUser:InnerObj",
-          "properties":{
-            "age":{
-              "type":"integer"
-            },
-            "string":{
-              "type":"string"
-            },
-            "userType":{
-              "type":"string",
-              "enum":[
-                "A1",
-                "B1",
-                "C1"
-              ]
-            }
+      "$ref":"#/definitions/SampleUser"
+    },
+    "definitions":{
+      "SampleUser":{
+        "type":"object",
+        "additionalProperties":false,
+        "properties":{
+          "name":{
+            "type":"string"
+          },
+          "inner":{
+            "$ref":"#/definitions/InnerObj"
+          },
+          "interface":{
+            "oneOf":[
+              {
+                "$ref":"#/definitions/SampleImpl1"
+              },
+              {
+                "$ref":"#/definitions/SampleImpl2"
+              }
+            ]
           }
         }
+      },
+      "InnerObj":{
+        "type":"object",
+        "additionalProperties":false,
+        "properties":{
+          "age":{
+            "type":"integer",
+            "minimum":0,
+            "maximum":200
+          },
+          "string":{
+            "type":"string"
+          },
+          "userType":{
+            "type":"string",
+            "enum":[
+              "A1",
+              "B1",
+              "C1"
+            ]
+          }
+        },
+        "required":[
+          "age"
+        ]
+      },
+      "SampleImpl1":{
+        "type":"object",
+        "additionalProperties":false,
+        "properties":{
+          "name":{
+            "type":"string",
+            "enum":[
+              "1"
+            ],
+            "default":"1"
+          },
+          "n":{
+            "type":"integer",
+            "maximum":10
+          }
+        },
+        "title":"1",
+        "required":[
+          "name",
+          "n"
+        ]
+      },
+      "SampleImpl2":{
+        "type":"object",
+        "additionalProperties":false,
+        "properties":{
+          "name":{
+            "type":"string",
+            "enum":[
+              "2"
+            ],
+            "default":"2"
+          },
+          "v":{
+            "type":"number"
+          }
+        },
+        "title":"2",
+        "required":[
+          "name",
+          "v"
+        ]
       }
     }
   }
